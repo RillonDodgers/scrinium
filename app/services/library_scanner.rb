@@ -59,13 +59,19 @@ class LibraryScanner
     metadata = metadata_for(relative_path)
     author = Author.find_or_create_by!(name: metadata.fetch(:author_name))
     series = find_or_create_series(author, metadata[:series_name])
-    book = Book.find_or_create_by!(library:, author:, series:, title: metadata.fetch(:title))
     file_stat = File.stat(path)
     format = File.extname(path).delete_prefix(".").downcase
-    book_file = book.book_files.find_or_initialize_by(format:, relative_path:)
+    book_file = find_existing_file(author:, series:, title: metadata.fetch(:title), format:, relative_path:)
+    book = book_file&.book || Book.find_or_create_by!(library:, author:, series:, title: metadata.fetch(:title))
+
+    if book_file&.book && (book_file.book.series != series || book_file.book.author != author)
+      book_file.book.update!(author:, series:)
+    end
+
+    book_file ||= book.book_files.find_or_initialize_by(format:, relative_path:)
     new_record = book_file.new_record?
 
-    book_file.assign_attributes(status: :present, size_bytes: file_stat.size, mtime: file_stat.mtime)
+    book_file.assign_attributes(relative_path:, status: :present, size_bytes: file_stat.size, mtime: file_stat.mtime)
     book_file.save! if new_record || book_file.changed?
 
     if new_record
@@ -73,6 +79,8 @@ class LibraryScanner
     elsif book_file.previous_changes.any?
       @updated_count += 1
     end
+
+    cleanup_missing_duplicates(author:, title: metadata.fetch(:title), format:, current_file: book_file)
   rescue StandardError => error
     @error_count += 1
     @last_error = "#{relative_path || path}: #{error.message}"
@@ -100,6 +108,36 @@ class LibraryScanner
     return if series_name.blank?
 
     Series.find_or_create_by!(author:, name: series_name)
+  end
+
+  def find_existing_file(author:, series:, title:, format:, relative_path:)
+    book = Book.find_by(library:, author:, series:, title:)
+    file = book&.book_files&.find_by(format:, relative_path:)
+    return file if file
+
+    missing_book = Book.joins(:book_files).find_by(
+      library:,
+      author:,
+      title:,
+      book_files: { format:, status: :missing }
+    )
+    return missing_book.book_files.where(format:, status: :missing).first if missing_book
+
+    Book.joins(:book_files).where(library:, author:, title:, book_files: { format:, status: :present }).find_each do |candidate_book|
+      stale_file = candidate_book.book_files.where(format:, status: :present).detect do |book_file|
+        !File.exist?(book_file.absolute_path)
+      end
+      return stale_file if stale_file
+    end
+
+    nil
+  end
+
+  def cleanup_missing_duplicates(author:, title:, format:, current_file:)
+    Book.joins(:book_files).where(library:, author:, title:, book_files: { format:, status: :missing }).find_each do |book|
+      book.book_files.where(format:, status: :missing).where.not(id: current_file.id).destroy_all
+      book.destroy! if book.book_files.reload.none?
+    end
   end
 
   def mark_missing_files
