@@ -2,6 +2,15 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
 
+  namespace :admin do
+    resources :libraries, except: %i[ destroy ] do
+      resources :scan_runs, only: %i[ create show ]
+      resources :books, only: %i[ index show ]
+    end
+
+    root "libraries#index"
+  end
+
   root "home#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

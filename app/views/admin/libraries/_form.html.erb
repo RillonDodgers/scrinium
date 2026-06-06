@@ -1,0 +1,28 @@
+<%= form_with model: [ :admin, library ], class: "card bg-base-100 shadow" do |form| %>
+  <div class="card-body gap-4">
+    <% if library.errors.any? %>
+      <div class="alert alert-error">
+        <span><%= library.errors.full_messages.to_sentence %></span>
+      </div>
+    <% end %>
+
+    <label class="form-control w-full">
+      <div class="label">
+        <span class="label-text">Name</span>
+      </div>
+      <%= form.text_field :name, class: "input input-bordered w-full", autofocus: true %>
+    </label>
+
+    <label class="form-control w-full">
+      <div class="label">
+        <span class="label-text">Root path</span>
+      </div>
+      <%= form.text_field :root_path, class: "input input-bordered w-full", placeholder: "/Users/dir/Documents/Books" %>
+    </label>
+
+    <div class="card-actions justify-end">
+      <%= link_to "Cancel", admin_libraries_path, class: "btn btn-ghost" %>
+      <%= form.submit class: "btn btn-primary" %>
+    </div>
+  </div>
+<% end %>

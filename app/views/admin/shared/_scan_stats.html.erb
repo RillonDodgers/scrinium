@@ -1,0 +1,22 @@
+<div class="stats stats-vertical lg:stats-horizontal shadow w-full">
+  <div class="stat">
+    <div class="stat-title">Found</div>
+    <div class="stat-value"><%= scan_run.found_count %></div>
+  </div>
+  <div class="stat">
+    <div class="stat-title">Created</div>
+    <div class="stat-value"><%= scan_run.created_count %></div>
+  </div>
+  <div class="stat">
+    <div class="stat-title">Updated</div>
+    <div class="stat-value"><%= scan_run.updated_count %></div>
+  </div>
+  <div class="stat">
+    <div class="stat-title">Missing</div>
+    <div class="stat-value"><%= scan_run.missing_count %></div>
+  </div>
+  <div class="stat">
+    <div class="stat-title">Errors</div>
+    <div class="stat-value"><%= scan_run.error_count %></div>
+  </div>
+</div>

@@ -3,7 +3,14 @@
 one:
   email: one@example.com
   password_digest: <%= password_digest %>
+  role: user
 
 two:
   email: two@example.com
   password_digest: <%= password_digest %>
+  role: user
+
+admin:
+  email: admin@example.com
+  password_digest: <%= password_digest %>
+  role: admin

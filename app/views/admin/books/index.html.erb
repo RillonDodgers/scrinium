@@ -1,0 +1,9 @@
+<div class="w-full space-y-6">
+  <%= render "admin/shared/page_header", title: "Books", eyebrow: @library.name, actions: link_to("Library", admin_library_path(@library), class: "btn btn-ghost") %>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <%= render "table", library: @library, books: @books %>
+    </div>
+  </div>
+</div>

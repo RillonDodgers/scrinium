@@ -1,0 +1,78 @@
+<div class="w-full space-y-6">
+  <%= render "admin/shared/page_header", title: @library.name, eyebrow: @library.root_path, actions: safe_join([
+    button_to("Scan now", admin_library_scan_runs_path(@library), method: :post, class: "btn btn-primary"),
+    link_to("Books", admin_library_books_path(@library), class: "btn btn-ghost"),
+    link_to("Edit", edit_admin_library_path(@library), class: "btn btn-ghost")
+  ]) %>
+
+  <div class="grid gap-4 lg:grid-cols-3">
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">Books</h2>
+        <p class="text-4xl font-bold"><%= @library.books.count %></p>
+      </div>
+    </div>
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">Files</h2>
+        <p class="text-4xl font-bold"><%= @library.book_files.count %></p>
+      </div>
+    </div>
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">Missing</h2>
+        <p class="text-4xl font-bold"><%= @library.book_files.where(status: :missing).count %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <div class="flex items-center justify-between">
+        <h2 class="card-title">Recent scans</h2>
+      </div>
+      <% if @scan_runs.any? %>
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Found</th>
+                <th>Created</th>
+                <th>Updated</th>
+                <th>Missing</th>
+                <th>Finished</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @scan_runs.each do |scan_run| %>
+                <tr>
+                  <td><%= render "admin/shared/scan_status", scan_run: scan_run %></td>
+                  <td><%= scan_run.found_count %></td>
+                  <td><%= scan_run.created_count %></td>
+                  <td><%= scan_run.updated_count %></td>
+                  <td><%= scan_run.missing_count %></td>
+                  <td><%= scan_run.finished_at&.to_fs(:short) || "Not finished" %></td>
+                  <td><%= link_to "View", admin_library_scan_run_path(@library, scan_run), class: "btn btn-sm btn-ghost" %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="opacity-70">No scans yet.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <div class="flex items-center justify-between">
+        <h2 class="card-title">Recent books</h2>
+        <%= link_to "View all", admin_library_books_path(@library), class: "btn btn-sm btn-ghost" %>
+      </div>
+      <%= render "admin/books/table", library: @library, books: @books %>
+    </div>
+  </div>
+</div>

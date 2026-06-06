@@ -1,0 +1,52 @@
+<div class="w-full space-y-6">
+  <%= render "admin/shared/page_header", title: @book.title, eyebrow: @book.author.name, actions: link_to("Back to books", admin_library_books_path(@library), class: "btn btn-ghost") %>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <dl class="grid gap-4 sm:grid-cols-3">
+        <div>
+          <dt class="text-sm opacity-70">Author</dt>
+          <dd class="font-semibold"><%= @book.author.name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm opacity-70">Series</dt>
+          <dd class="font-semibold"><%= @book.series&.name || "None" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm opacity-70">Library</dt>
+          <dd class="font-semibold"><%= @library.name %></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Files</h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Format</th>
+              <th>Status</th>
+              <th>Relative path</th>
+              <th>Size</th>
+              <th>Modified</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @book.book_files.each do |book_file| %>
+              <tr>
+                <td><span class="badge badge-outline"><%= book_file.format %></span></td>
+                <td><span class="badge <%= book_file.status_missing? ? "badge-error" : "badge-success" %>"><%= book_file.status %></span></td>
+                <td><code><%= book_file.relative_path %></code></td>
+                <td><%= number_to_human_size(book_file.size_bytes) %></td>
+                <td><%= book_file.mtime.to_fs(:short) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
