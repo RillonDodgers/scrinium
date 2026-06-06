@@ -10,7 +10,77 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_06_224203) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_06_230000) do
+  create_table "authors", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_authors_on_name", unique: true
+  end
+
+  create_table "book_files", force: :cascade do |t|
+    t.integer "book_id", null: false
+    t.datetime "created_at", null: false
+    t.string "format", null: false
+    t.datetime "mtime", null: false
+    t.string "relative_path", null: false
+    t.integer "size_bytes", null: false
+    t.string "status", default: "present", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id", "format", "relative_path"], name: "index_book_files_on_book_id_and_format_and_relative_path", unique: true
+    t.index ["book_id"], name: "index_book_files_on_book_id"
+    t.index ["relative_path"], name: "index_book_files_on_relative_path"
+    t.index ["status"], name: "index_book_files_on_status"
+  end
+
+  create_table "books", force: :cascade do |t|
+    t.integer "author_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "library_id", null: false
+    t.integer "series_id"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_books_on_author_id"
+    t.index ["library_id", "author_id", "series_id", "title"], name: "idx_on_library_id_author_id_series_id_title_071ab040c9", unique: true
+    t.index ["library_id"], name: "index_books_on_library_id"
+    t.index ["series_id"], name: "index_books_on_series_id"
+  end
+
+  create_table "libraries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "root_path", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_libraries_on_name", unique: true
+    t.index ["root_path"], name: "index_libraries_on_root_path", unique: true
+  end
+
+  create_table "scan_runs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "created_count", default: 0, null: false
+    t.integer "error_count", default: 0, null: false
+    t.datetime "finished_at"
+    t.integer "found_count", default: 0, null: false
+    t.text "last_error"
+    t.integer "library_id", null: false
+    t.integer "missing_count", default: 0, null: false
+    t.datetime "started_at"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.integer "updated_count", default: 0, null: false
+    t.index ["library_id"], name: "index_scan_runs_on_library_id"
+    t.index ["status"], name: "index_scan_runs_on_status"
+  end
+
+  create_table "series", force: :cascade do |t|
+    t.integer "author_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id", "name"], name: "index_series_on_author_id_and_name", unique: true
+    t.index ["author_id"], name: "index_series_on_author_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -29,5 +99,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_06_224203) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "book_files", "books"
+  add_foreign_key "books", "authors"
+  add_foreign_key "books", "libraries"
+  add_foreign_key "books", "series"
+  add_foreign_key "scan_runs", "libraries"
+  add_foreign_key "series", "authors"
   add_foreign_key "sessions", "users"
 end

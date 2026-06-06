@@ -1,0 +1,31 @@
+<div class="w-full space-y-6">
+  <%= render "admin/shared/page_header", title: "Scan run", eyebrow: @library.name, actions: link_to("Library", admin_library_path(@library), class: "btn btn-ghost") %>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body gap-6">
+      <div class="flex items-center gap-2">
+        <h2 class="card-title">Status</h2>
+        <%= render "admin/shared/scan_status", scan_run: @scan_run %>
+      </div>
+
+      <%= render "admin/shared/scan_stats", scan_run: @scan_run %>
+
+      <dl class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <dt class="text-sm opacity-70">Started</dt>
+          <dd class="font-semibold"><%= @scan_run.started_at&.to_fs(:long) || "Not started" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm opacity-70">Finished</dt>
+          <dd class="font-semibold"><%= @scan_run.finished_at&.to_fs(:long) || "Not finished" %></dd>
+        </div>
+      </dl>
+
+      <% if @scan_run.last_error.present? %>
+        <div class="alert alert-error">
+          <span><%= @scan_run.last_error %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

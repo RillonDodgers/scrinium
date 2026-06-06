@@ -1,0 +1,3 @@
+<span class="badge <%= scan_run.completed? ? "badge-success" : scan_run.failed? ? "badge-error" : scan_run.running? ? "badge-info" : "badge-ghost" %>">
+  <%= scan_run.status %>
+</span>

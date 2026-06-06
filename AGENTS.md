@@ -37,6 +37,8 @@ Keep this section up to date whenever future sessions introduce or change archit
 - Admin users have access to everything.
 - Regular users have read-only access to libraries shared with them.
 - Build mobile first, with desktop treated as first-class support rather than an afterthought.
+- Source ebook/audiobook files are referenced by local filesystem paths through `Library` and `BookFile`; do not use Active Storage for source media files.
+- Store media paths relative to the library root and derive absolute paths at runtime.
 
 ## Service Objects
 
