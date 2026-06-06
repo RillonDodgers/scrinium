@@ -14,6 +14,7 @@
               <div class="card-actions">
                 <%= link_to "Open", admin_library_path(library), class: "btn btn-primary" %>
                 <%= link_to "Edit", edit_admin_library_path(library), class: "btn btn-ghost" %>
+                <%= button_to "Delete records", admin_library_path(library), method: :delete, class: "btn btn-error btn-outline", form: { data: { turbo_confirm: "Delete #{library.name} and all indexed records? Files on disk will not be deleted." } } %>
               </div>
             </div>
           </div>

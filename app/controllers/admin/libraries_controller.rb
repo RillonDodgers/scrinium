@@ -1,5 +1,5 @@
 class Admin::LibrariesController < Admin::BaseController
-  before_action :set_library, only: %i[ show edit update ]
+  before_action :set_library, only: %i[ show edit update destroy ]
 
   def index
     @libraries = Library.order(:name)
@@ -33,6 +33,12 @@ class Admin::LibrariesController < Admin::BaseController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @library.destroy!
+
+    redirect_to admin_libraries_path, notice: "Library records deleted."
   end
 
   private

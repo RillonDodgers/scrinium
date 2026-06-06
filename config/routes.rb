@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
 
   namespace :admin do
-    resources :libraries, except: %i[ destroy ] do
+    resources :libraries do
       resources :scan_runs, only: %i[ create show ]
       resources :books, only: %i[ index show ]
     end
