@@ -2,7 +2,8 @@
   <%= render "admin/shared/page_header", title: @library.name, eyebrow: @library.root_path, actions: safe_join([
     button_to("Scan now", admin_library_scan_runs_path(@library), method: :post, class: "btn btn-primary"),
     link_to("Books", admin_library_books_path(@library), class: "btn btn-ghost"),
-    link_to("Edit", edit_admin_library_path(@library), class: "btn btn-ghost")
+    link_to("Edit", edit_admin_library_path(@library), class: "btn btn-ghost"),
+    button_to("Delete records", admin_library_path(@library), method: :delete, class: "btn btn-error btn-outline", form: { data: { turbo_confirm: "Delete #{@library.name} and all indexed records? Files on disk will not be deleted." } })
   ]) %>
 
   <div class="grid gap-4 lg:grid-cols-3">
