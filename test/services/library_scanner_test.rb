@@ -54,6 +54,52 @@ class LibraryScannerTest < ActiveSupport::TestCase
     end
   end
 
+  test "reconciles moved files into inferred series instead of creating duplicates" do
+    with_library_root do |root|
+      old_path = write_file(root, "Matt Dinniman/Carl's Doomsday Scenario/Carl's Doomsday Scenario.epub")
+      library = Library.create!(name: "Local", root_path: root)
+
+      LibraryScanner.new(library:, scan_run: library.scan_runs.create!).call
+
+      new_path = File.join(root, "Matt Dinniman/Dungeon Crawler Carl/Carl's Doomsday Scenario/Carl's Doomsday Scenario.epub")
+      FileUtils.mkdir_p(File.dirname(new_path))
+      FileUtils.mv(old_path, new_path)
+
+      LibraryScanner.new(library:, scan_run: library.scan_runs.create!).call
+
+      assert_equal 1, library.books.count
+      assert_equal 1, library.book_files.count
+
+      book = library.books.sole
+      assert_equal "Dungeon Crawler Carl", book.series.name
+      assert_equal "Matt Dinniman/Dungeon Crawler Carl/Carl's Doomsday Scenario/Carl's Doomsday Scenario.epub", book.book_files.sole.relative_path
+      assert_predicate book.book_files.sole, :status_present?
+    end
+  end
+
+  test "cleans duplicate missing records after moved file was already indexed" do
+    with_library_root do |root|
+      write_file(root, "Matt Dinniman/Dungeon Crawler Carl/Carl's Doomsday Scenario/Carl's Doomsday Scenario.epub")
+      library = Library.create!(name: "Local", root_path: root)
+      author = Author.create!(name: "Matt Dinniman")
+      old_book = Book.create!(library:, author:, title: "Carl's Doomsday Scenario")
+      old_book.book_files.create!(
+        format: :epub,
+        relative_path: "Matt Dinniman/Carl's Doomsday Scenario/Carl's Doomsday Scenario.epub",
+        status: :missing,
+        size_bytes: 5,
+        mtime: Time.current
+      )
+
+      LibraryScanner.new(library:, scan_run: library.scan_runs.create!).call
+
+      assert_equal 1, library.books.count
+      assert_equal 1, library.book_files.count
+      assert_equal "Dungeon Crawler Carl", library.books.sole.series.name
+      assert_equal 0, library.book_files.status_missing.count
+    end
+  end
+
   test "uses filename as title for author level files" do
     with_library_root do |root|
       write_file(root, "Andy Weir/Project Hail Mary.m4b")
