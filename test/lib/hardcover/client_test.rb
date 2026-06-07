@@ -3,7 +3,7 @@ require "hardcover/client"
 
 class Hardcover::ClientTest < ActiveSupport::TestCase
   setup do
-    ApplicationSetting.current.update!(hardcover_api_token: "hc-token")
+    ApplicationSetting.current.update!(hardcover_api_token: hardcover_api_token)
     @cache = ActiveSupport::Cache::MemoryStore.new
     @old_cache = Rails.cache
     Rails.instance_variable_set(:@cache, @cache)
@@ -25,7 +25,7 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     assert_equal [ { "id" => 1, "title" => "Dune" } ], first
     assert_equal first, second
     assert_equal 1, requests.length
-    assert_equal "hc-token", requests.first["authorization"]
+    assert_equal hardcover_api_token, requests.first["authorization"]
     assert_match(/SearchBooks/, requests.first.body)
   end
 
@@ -136,6 +136,10 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
   end
 
 private
+
+  def hardcover_api_token
+    ENV.fetch("HARDCOVER_API_TOKEN", "hc-token")
+  end
 
   def fake_http(response, requests: [])
     http = Object.new
