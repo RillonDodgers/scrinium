@@ -111,6 +111,14 @@
                       <span class="label-text">Series</span>
                     </label>
                     <label class="label cursor-pointer justify-start gap-2">
+                      <%= check_box_tag "fields[details]", "1", true, class: "checkbox checkbox-sm" %>
+                      <span class="label-text">Book details</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2">
+                      <%= check_box_tag "fields[tags]", "1", true, class: "checkbox checkbox-sm" %>
+                      <span class="label-text">Genres, moods, and warnings</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2">
                       <%= check_box_tag "fields[ebook_cover]", "1", true, class: "checkbox checkbox-sm" %>
                       <span class="label-text">Ebook cover</span>
                     </label>

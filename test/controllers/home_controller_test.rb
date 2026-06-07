@@ -40,10 +40,9 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".badge", "m4b"
-    assert_select ".badge", text: "epub", count: 0
   end
 
-  test "both media filter shows ebooks and audiobooks" do
+  test "both media filter shows book once with ebooks and audiobooks" do
     @book.book_files.create!(
       format: :m4b,
       relative_path: "Matt Dinniman/Dungeon Crawler Carl/Dungeon Crawler Carl.m4b",
@@ -57,6 +56,7 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
+    assert_select "h3", { text: "Dungeon Crawler Carl", count: 1 }
     assert_select ".badge", "epub"
     assert_select ".badge", "m4b"
   end

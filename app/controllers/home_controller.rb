@@ -8,17 +8,17 @@ class HomeController < ApplicationController
       [ "Both", "both" ]
     ]
 
-    @book_files = BookFile
-      .status_present
-      .where(format: selected_formats)
-      .joins(book: :author)
-      .includes(:cover_attachment, book: [ :author, :library ])
-      .order("books.title ASC", "book_files.format ASC")
+    @books = Book
+      .joins(:book_files, :author)
+      .merge(BookFile.status_present.where(format: selected_formats))
+      .includes(:author, book_files: { cover_attachment: :blob })
+      .distinct
+      .order("books.title ASC")
 
     return if @query.blank?
 
     search = "%#{Book.sanitize_sql_like(@query.downcase)}%"
-    @book_files = @book_files.where("LOWER(books.title) LIKE :search OR LOWER(authors.name) LIKE :search", search:)
+    @books = @books.where("LOWER(books.title) LIKE :search OR LOWER(authors.name) LIKE :search", search:)
   end
 
   private

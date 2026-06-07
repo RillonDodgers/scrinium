@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_07_005151) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_07_010203) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -69,14 +69,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_005151) do
     t.index ["status"], name: "index_book_files_on_status"
   end
 
+  create_table "book_metadata_tags", force: :cascade do |t|
+    t.integer "book_id", null: false
+    t.integer "count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.integer "metadata_tag_id", null: false
+    t.decimal "spoiler_ratio", precision: 5, scale: 4, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id", "metadata_tag_id"], name: "index_book_metadata_tags_on_book_id_and_metadata_tag_id", unique: true
+    t.index ["book_id"], name: "index_book_metadata_tags_on_book_id"
+    t.index ["metadata_tag_id"], name: "index_book_metadata_tags_on_metadata_tag_id"
+  end
+
   create_table "books", force: :cascade do |t|
     t.integer "author_id", null: false
+    t.decimal "average_rating", precision: 5, scale: 3
     t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "hardcover_id"
+    t.string "hardcover_slug"
     t.integer "library_id", null: false
+    t.integer "pages"
+    t.integer "ratings_count"
+    t.json "ratings_distribution", default: {}, null: false
+    t.date "release_date"
+    t.integer "release_year"
     t.integer "series_id"
+    t.decimal "series_position", precision: 8, scale: 2
+    t.string "subtitle"
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["author_id"], name: "index_books_on_author_id"
+    t.index ["hardcover_id"], name: "index_books_on_hardcover_id"
+    t.index ["hardcover_slug"], name: "index_books_on_hardcover_slug"
     t.index ["library_id", "author_id", "series_id", "title"], name: "idx_on_library_id_author_id_series_id_title_071ab040c9", unique: true
     t.index ["library_id"], name: "index_books_on_library_id"
     t.index ["series_id"], name: "index_books_on_series_id"
@@ -89,6 +114,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_005151) do
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_libraries_on_name", unique: true
     t.index ["root_path"], name: "index_libraries_on_root_path", unique: true
+  end
+
+  create_table "metadata_tags", force: :cascade do |t|
+    t.string "category", null: false
+    t.string "category_slug", null: false
+    t.datetime "created_at", null: false
+    t.integer "hardcover_tag_id"
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_slug", "slug"], name: "index_metadata_tags_on_category_slug_and_slug", unique: true
+    t.index ["hardcover_tag_id"], name: "index_metadata_tags_on_hardcover_tag_id", unique: true, where: "hardcover_tag_id IS NOT NULL"
   end
 
   create_table "scan_runs", force: :cascade do |t|
@@ -110,11 +147,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_005151) do
 
   create_table "series", force: :cascade do |t|
     t.integer "author_id", null: false
+    t.integer "books_count"
     t.datetime "created_at", null: false
+    t.integer "hardcover_id"
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["author_id", "name"], name: "index_series_on_author_id_and_name", unique: true
     t.index ["author_id"], name: "index_series_on_author_id"
+    t.index ["hardcover_id"], name: "index_series_on_hardcover_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -150,6 +190,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_005151) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "book_files", "books"
+  add_foreign_key "book_metadata_tags", "books"
+  add_foreign_key "book_metadata_tags", "metadata_tags"
   add_foreign_key "books", "authors"
   add_foreign_key "books", "libraries"
   add_foreign_key "books", "series"

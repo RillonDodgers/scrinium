@@ -22,9 +22,9 @@
     <% end %>
   </div>
 
-  <% if @book_files.any? %>
+  <% if @books.any? %>
     <div class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8">
-      <%= render partial: "books/cover_card", collection: @book_files, as: :book_file %>
+      <%= render partial: "books/cover_card", collection: @books, as: :book %>
     </div>
   <% else %>
     <div class="border border-dashed border-base-content/20 bg-base-100 p-8 text-center shadow-sm">
