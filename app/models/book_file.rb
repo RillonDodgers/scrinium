@@ -14,4 +14,22 @@ class BookFile < ApplicationRecord
   def absolute_path
     File.join(book.library.root_path, relative_path)
   end
+
+  def duration_label
+    return if duration_seconds.blank?
+
+    total_seconds = duration_seconds.to_i
+    hours = total_seconds / 3600
+    minutes = (total_seconds % 3600) / 60
+
+    if hours.positive?
+      "#{hours}h #{minutes}m"
+    else
+      "#{minutes}m"
+    end
+  end
+
+  def chapter_count
+    chapters.size
+  end
 end

@@ -1,0 +1,21 @@
+<div
+  class="space-y-4"
+  data-controller="epub-reader"
+  data-epub-reader-url-value="<%= media_book_file_path(epub_file) %>"
+  data-epub-reader-progress-url-value="<%= progress_book_path(book) %>"
+  data-epub-reader-location-value="<%= progress.epub_location %>"
+  data-epub-reader-mode-value="<%= mode %>">
+  <div class="flex items-center justify-between gap-3">
+    <%= button_tag type: "button", class: "btn btn-ghost btn-sm", data: { action: "epub-reader#previous" } do %>
+      <%= lucide_icon("chevron-left", "class" => "size-4") %>
+      Previous
+    <% end %>
+    <%= button_tag type: "button", class: "btn btn-ghost btn-sm", data: { action: "epub-reader#next" } do %>
+      Next
+      <%= lucide_icon("chevron-right", "class" => "size-4") %>
+    <% end %>
+  </div>
+
+  <div class="min-h-[70vh] overflow-hidden border border-base-300 bg-base-100 shadow-sm" data-epub-reader-target="viewer"></div>
+  <div class="alert alert-error hidden" data-epub-reader-target="error"></div>
+</div>

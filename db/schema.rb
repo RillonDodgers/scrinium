@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_07_010203) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_07_021001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -55,11 +55,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_010203) do
   end
 
   create_table "book_files", force: :cascade do |t|
+    t.integer "bit_rate"
     t.integer "book_id", null: false
+    t.integer "channels"
+    t.json "chapters", default: [], null: false
+    t.string "codec"
     t.datetime "created_at", null: false
+    t.integer "duration_seconds"
     t.string "format", null: false
+    t.json "media_metadata", default: {}, null: false
     t.datetime "mtime", null: false
     t.string "relative_path", null: false
+    t.integer "sample_rate"
     t.integer "size_bytes", null: false
     t.string "status", default: "present", null: false
     t.datetime "updated_at", null: false
@@ -79,6 +86,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_010203) do
     t.index ["book_id", "metadata_tag_id"], name: "index_book_metadata_tags_on_book_id_and_metadata_tag_id", unique: true
     t.index ["book_id"], name: "index_book_metadata_tags_on_book_id"
     t.index ["metadata_tag_id"], name: "index_book_metadata_tags_on_metadata_tag_id"
+  end
+
+  create_table "book_progresses", force: :cascade do |t|
+    t.decimal "audio_position_seconds", precision: 12, scale: 3, default: "0.0", null: false
+    t.integer "book_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "epub_book_file_id"
+    t.string "epub_location"
+    t.string "last_mode"
+    t.integer "m4b_book_file_id"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["book_id"], name: "index_book_progresses_on_book_id"
+    t.index ["epub_book_file_id"], name: "index_book_progresses_on_epub_book_file_id"
+    t.index ["m4b_book_file_id"], name: "index_book_progresses_on_m4b_book_file_id"
+    t.index ["user_id", "book_id"], name: "index_book_progresses_on_user_id_and_book_id", unique: true
+    t.index ["user_id"], name: "index_book_progresses_on_user_id"
   end
 
   create_table "books", force: :cascade do |t|
@@ -192,6 +216,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_010203) do
   add_foreign_key "book_files", "books"
   add_foreign_key "book_metadata_tags", "books"
   add_foreign_key "book_metadata_tags", "metadata_tags"
+  add_foreign_key "book_progresses", "book_files", column: "epub_book_file_id"
+  add_foreign_key "book_progresses", "book_files", column: "m4b_book_file_id"
+  add_foreign_key "book_progresses", "books"
+  add_foreign_key "book_progresses", "users"
   add_foreign_key "books", "authors"
   add_foreign_key "books", "libraries"
   add_foreign_key "books", "series"

@@ -1,0 +1,34 @@
+<div
+  class="space-y-4"
+  data-controller="audio-player"
+  data-audio-player-progress-url-value="<%= progress_book_path(book) %>"
+  data-audio-player-position-value="<%= progress.audio_position_seconds.to_f %>"
+  data-audio-player-mode-value="<%= mode %>">
+  <audio
+    class="w-full"
+    controls
+    preload="metadata"
+    data-audio-player-target="audio"
+    data-action="loadedmetadata->audio-player#restore timeupdate->audio-player#saveNow pause->audio-player#saveNow">
+    <source src="<%= media_book_file_path(m4b_file) %>" type="audio/mp4">
+  </audio>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <%= button_tag type: "button", class: "btn btn-sm", data: { action: "audio-player#back" } do %>
+      <%= lucide_icon("rotate-ccw", "class" => "size-4") %>
+      15s
+    <% end %>
+    <%= button_tag type: "button", class: "btn btn-sm", data: { action: "audio-player#forward" } do %>
+      <%= lucide_icon("rotate-cw", "class" => "size-4") %>
+      15s
+    <% end %>
+    <select class="select select-bordered select-sm" data-action="audio-player#setSpeed">
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+    </select>
+    <span class="text-sm opacity-60" data-audio-player-target="time"></span>
+  </div>
+</div>

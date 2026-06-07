@@ -1,0 +1,35 @@
+<div class="space-y-6">
+  <header>
+    <%= link_to book_path(@book), class: "btn btn-ghost btn-sm mb-3" do %>
+      <%= lucide_icon("arrow-left", "class" => "size-4") %>
+      Back
+    <% end %>
+    <h1 class="text-2xl font-bold"><%= @book.title %></h1>
+    <p class="text-sm opacity-60">By <%= @book.author.name %></p>
+  </header>
+
+  <section class="grid gap-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
+    <%= render "books/cover", book_file: @book.preferred_cover_file, book: @book %>
+    <div class="space-y-5">
+      <div>
+        <h2 class="text-xl font-semibold">Audiobook</h2>
+        <p class="text-sm opacity-60"><%= [@m4b_file.duration_label, pluralize(@m4b_file.chapter_count, "chapter")].compact.join(" · ") %></p>
+      </div>
+      <%= render "books/audio_player", book: @book, m4b_file: @m4b_file, progress: @progress, mode: "listen" %>
+    </div>
+  </section>
+
+  <% if @m4b_file.chapters.any? %>
+    <section class="space-y-3">
+      <h2 class="text-xl font-semibold">Chapters</h2>
+      <div class="grid gap-2 md:grid-cols-2">
+        <% @m4b_file.chapters.each_with_index do |chapter, index| %>
+          <div class="border border-base-300 bg-base-100 p-3 text-sm">
+            <div class="font-semibold"><%= chapter["title"].presence || "Chapter #{index + 1}" %></div>
+            <div class="opacity-60"><%= Time.at(chapter["start_time"].to_f).utc.strftime("%H:%M:%S") %></div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>
