@@ -29,6 +29,36 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     assert_match(/SearchBooks/, requests.first.body)
   end
 
+  test "search unwraps Hardcover Typesense document hits" do
+    response = json_response({
+      data: {
+        search: {
+          results: [
+            {
+              found: 5,
+              hits: [],
+              document: {
+                id: 427578,
+                title: "Project Hail Mary",
+                author_names: [ "Andy Weir" ],
+                series_names: []
+              }
+            }
+          ]
+        }
+      }
+    })
+
+    results = Hardcover::Client.new(http: fake_http(response)).search_books(query: "Project Hail Mary")
+
+    assert_equal [ {
+      "id" => 427578,
+      "title" => "Project Hail Mary",
+      "author_names" => [ "Andy Weir" ],
+      "series_names" => []
+    } ], results
+  end
+
   test "book_metadata maps detail response" do
     response = json_response({
       data: {

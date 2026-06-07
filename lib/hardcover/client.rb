@@ -71,7 +71,7 @@ module Hardcover
 
       Rails.cache.fetch(search_cache_key(normalized_query, page, per_page), expires_in: SEARCH_CACHE_TTL) do
         response = graphql(SEARCH_QUERY, query: normalized_query, page:, perPage: per_page)
-        Array(response.dig("data", "search", "results"))
+        search_results_from(response)
       end
     end
 
@@ -115,6 +115,12 @@ module Hardcover
 
     def search_cache_key(query, page, per_page)
       [ "hardcover", "search_books", query, page.to_i, per_page.to_i ]
+    end
+
+    def search_results_from(response)
+      Array(response.dig("data", "search", "results")).filter_map do |result|
+        result["document"].presence || result
+      end
     end
 
     def normalize_query(query)
