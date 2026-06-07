@@ -1,0 +1,27 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.hardcover.app/v1/graphql
+    body:
+      encoding: UTF-8
+      string: '{"query":"query SearchBooks($query: String!, $page: Int!, $perPage: Int!) {\n  search(query: $query, query_type: \"Book\", page: $page, per_page: $perPage) {\n    results\n  }\n}\n","variables":{"query":"project hail mary","page":1,"perPage":5}}'
+    headers:
+      Authorization:
+      - "<HARDCOVER_API_TOKEN>"
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Scrinium Hardcover Metadata
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"data":{"search":{"results":[{"found":5,"hits":[],"document":{"id":427578,"title":"Project Hail Mary","author_names":["Andy Weir"],"series_names":[],"release_year":2021,"rating":4.496452830188679,"image":{"url":"https://assets.hardcover.app/editions/3274049/8741341047797682-91Mu67RfUL._SL1500_.jpg"}}}]}}}'
+  recorded_at: Sat, 06 Jun 2026 00:00:00 GMT
+recorded_with: VCR 6.3.1

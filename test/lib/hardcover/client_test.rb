@@ -59,6 +59,15 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     } ], results
   end
 
+  test "search replays GraphQL response from VCR cassette" do
+    VCR.use_cassette("hardcover/search_books") do
+      results = Hardcover::Client.new.search_books(query: "Project Hail Mary")
+
+      assert_equal "Project Hail Mary", results.first.fetch("title")
+      assert_equal [ "Andy Weir" ], results.first.fetch("author_names")
+    end
+  end
+
   test "book_metadata maps detail response" do
     response = json_response({
       data: {
