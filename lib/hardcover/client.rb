@@ -69,10 +69,12 @@ module Hardcover
       normalized_query = normalize_query(query)
       raise Error, "Enter a search query." if normalized_query.blank?
 
-      Rails.cache.fetch(search_cache_key(normalized_query, page, per_page), expires_in: SEARCH_CACHE_TTL) do
+      cached_results = Rails.cache.fetch(search_cache_key(normalized_query, page, per_page), expires_in: SEARCH_CACHE_TTL) do
         response = graphql(SEARCH_QUERY, query: normalized_query, page:, perPage: per_page)
-        Array(response.dig("data", "search", "results"))
+        response.dig("data", "search", "results")
       end
+
+      search_results_from(cached_results)
     end
 
     def book_metadata(id:)
@@ -114,7 +116,18 @@ module Hardcover
     end
 
     def search_cache_key(query, page, per_page)
-      [ "hardcover", "search_books", query, page.to_i, per_page.to_i ]
+      [ "hardcover", "search_books", "v2", query, page.to_i, per_page.to_i ]
+    end
+
+    def search_results_from(results)
+      results = results.dig("data", "search", "results") if results.is_a?(Hash) && results.key?("data")
+      hits = results.is_a?(Hash) && results.key?("hits") ? results["hits"] : results
+
+      Array(hits).filter_map do |result|
+        next result unless result.is_a?(Hash)
+
+        result["document"].presence || result
+      end
     end
 
     def normalize_query(query)

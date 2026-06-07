@@ -3,7 +3,7 @@ require "hardcover/client"
 
 class Hardcover::ClientTest < ActiveSupport::TestCase
   setup do
-    ApplicationSetting.current.update!(hardcover_api_token: "hc-token")
+    ApplicationSetting.current.update!(hardcover_api_token: hardcover_api_token)
     @cache = ActiveSupport::Cache::MemoryStore.new
     @old_cache = Rails.cache
     Rails.instance_variable_set(:@cache, @cache)
@@ -25,8 +25,72 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     assert_equal [ { "id" => 1, "title" => "Dune" } ], first
     assert_equal first, second
     assert_equal 1, requests.length
-    assert_equal "hc-token", requests.first["authorization"]
+    assert_equal hardcover_api_token, requests.first["authorization"]
     assert_match(/SearchBooks/, requests.first.body)
+  end
+
+  test "search unwraps Hardcover Typesense document hits" do
+    response = json_response({
+      data: {
+        search: {
+          results: {
+            found: 5,
+            hits: [
+              {
+                document: {
+                  id: 427578,
+                  title: "Project Hail Mary",
+                  author_names: [ "Andy Weir" ],
+                  series_names: []
+                }
+              }
+            ]
+          }
+        }
+      }
+    })
+
+    results = Hardcover::Client.new(http: fake_http(response)).search_books(query: "Project Hail Mary")
+
+    assert_equal [ {
+      "id" => 427578,
+      "title" => "Project Hail Mary",
+      "author_names" => [ "Andy Weir" ],
+      "series_names" => []
+    } ], results
+  end
+
+  test "search preserves flat result hashes" do
+    response = json_response({
+      data: {
+        search: {
+          results: [
+            {
+              id: 1,
+              title: "Dune",
+              author_names: [ "Frank Herbert" ]
+            }
+          ]
+        }
+      }
+    })
+
+    results = Hardcover::Client.new(http: fake_http(response)).search_books(query: "Dune")
+
+    assert_equal [ {
+      "id" => 1,
+      "title" => "Dune",
+      "author_names" => [ "Frank Herbert" ]
+    } ], results
+  end
+
+  test "search replays GraphQL response from VCR cassette" do
+    VCR.use_cassette("hardcover/search_books") do
+      results = Hardcover::Client.new.search_books(query: "Project Hail Mary")
+
+      assert_equal "Project Hail Mary", results.first.fetch("title")
+      assert_equal [ "Andy Weir" ], results.first.fetch("author_names")
+    end
   end
 
   test "book_metadata maps detail response" do
@@ -96,7 +160,37 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     assert_equal 7.days, expires_in
   end
 
+  test "search normalizes cached Hardcover result wrapper" do
+    Rails.cache.write(
+      [ "hardcover", "search_books", "v2", "project hail mary", 1, 5 ],
+      {
+        "found" => 5,
+        "hits" => [
+          {
+            "document" => {
+              "id" => 427578,
+              "title" => "Project Hail Mary",
+              "author_names" => [ "Andy Weir" ]
+            }
+          }
+        ]
+      }
+    )
+
+    results = Hardcover::Client.new.search_books(query: "Project Hail Mary")
+
+    assert_equal [ {
+      "id" => 427578,
+      "title" => "Project Hail Mary",
+      "author_names" => [ "Andy Weir" ]
+    } ], results
+  end
+
 private
+
+  def hardcover_api_token
+    ENV.fetch("HARDCOVER_API_TOKEN", "hc-token")
+  end
 
   def fake_http(response, requests: [])
     http = Object.new
