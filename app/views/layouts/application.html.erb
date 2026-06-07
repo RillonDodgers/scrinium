@@ -23,15 +23,62 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex flex-col gap-4">
-      <% flash.each do |type, message| %>
-        <div class="alert <%= type == "alert" ? "alert-error" : "alert-success" %>">
-          <span><%= message %></span>
-        </div>
+  <body class="bg-base-200 text-base-content">
+    <main class="flex min-h-screen flex-col">
+      <% if Current.user %>
+        <header class="navbar min-h-16 border-b border-base-300 bg-base-100 px-4">
+          <div class="flex-1">
+            <%= link_to root_path, class: "flex items-center gap-3 text-xl font-bold" do %>
+              <span class="grid size-10 place-items-center rounded-lg bg-primary text-primary-content">
+                <%= lucide_icon("book-open", "class" => "size-5") %>
+              </span>
+              <span>Scrinium</span>
+            <% end %>
+          </div>
+
+          <div class="flex-none">
+            <%= button_to session_path, method: :delete, class: "btn btn-ghost" do %>
+              <%= lucide_icon("log-out", "class" => "size-4") %>
+              Sign out
+            <% end %>
+          </div>
+        </header>
       <% end %>
 
-      <%= yield %>
+      <div class="flex flex-1">
+        <% if Current.user %>
+          <aside class="hidden w-64 shrink-0 border-r border-base-300 bg-base-100 p-4 lg:flex lg:flex-col">
+            <nav class="menu gap-1 p-0 text-base">
+              <li>
+                <%= link_to root_path, class: current_page?(root_path) ? "active" : nil do %>
+                  <%= lucide_icon("library", "class" => "size-4") %>
+                  Library
+                <% end %>
+              </li>
+              <% if Current.user.admin? %>
+                <li>
+                  <%= link_to admin_root_path, class: request.path.start_with?("/admin") ? "active" : nil do %>
+                    <%= lucide_icon("settings", "class" => "size-4") %>
+                    Admin
+                  <% end %>
+                </li>
+              <% end %>
+            </nav>
+          </aside>
+        <% end %>
+
+        <section class="min-w-0 flex-1">
+          <div class="space-y-4 p-4 sm:p-6 lg:p-8">
+            <% flash.each do |type, message| %>
+              <div class="alert <%= type == "alert" ? "alert-error" : "alert-success" %>">
+                <span><%= message %></span>
+              </div>
+            <% end %>
+
+            <%= yield %>
+          </div>
+        </section>
+      </div>
     </main>
   </body>
 </html>

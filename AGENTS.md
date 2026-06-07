@@ -17,7 +17,8 @@ Scrinium is a Rails 8 ebook and audiobook application.
 - If no relevant issue exists, ask before creating one and before switching to plan mode for workshopping.
 - While workshopping requirements, create or update the GitHub issue so it reflects the current plan.
 - Create a branch named with the issue number and a `chore/`, `feat/`, or `fix/` prefix, such as `feat/1`.
-- When work is complete, run `git add .`, commit with `git commit -m "prefix: <message>"`, push with `git push origin <branch>`, create a pull request based against the head branch, and merge it.
+- When work is complete, run `git add .`, commit with `git commit -m "prefix: <message>"`, push with `git push origin <branch>`, and create a pull request based against the head branch.
+- Do not merge a pull request until the user explicitly signs off on the PR.
 
 ## Rails Conventions
 

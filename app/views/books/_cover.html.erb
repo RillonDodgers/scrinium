@@ -1,0 +1,12 @@
+<% cover_classes = local_assigns.fetch(:cover_classes, "") %>
+
+<div class="aspect-[2/3] overflow-hidden rounded-md bg-base-300 shadow-sm <%= cover_classes %>">
+  <% if book_file.cover.attached? %>
+    <%= image_tag book_file.cover, alt: "#{book_file.book.title} cover", class: "h-full w-full object-cover" %>
+  <% else %>
+    <div class="flex h-full w-full flex-col items-center justify-center gap-3 p-4 text-center text-base-content/50">
+      <%= lucide_icon("book", "class" => "size-12") %>
+      <span class="text-xs font-semibold uppercase tracking-wide">No cover</span>
+    </div>
+  <% end %>
+</div>
