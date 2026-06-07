@@ -1,0 +1,25 @@
+<div class="space-y-5 pb-36">
+  <header>
+    <%= link_to book_path(@book), class: "btn btn-ghost btn-sm mb-3" do %>
+      <%= lucide_icon("arrow-left", "class" => "size-4") %>
+      Back
+    <% end %>
+    <h1 class="text-2xl font-bold"><%= @book.title %></h1>
+    <p class="text-sm opacity-60">By <%= @book.author.name %></p>
+  </header>
+
+  <%= render "books/epub_reader", book: @book, epub_file: @epub_file, progress: @progress, mode: "read_and_listen" %>
+
+  <div class="fixed inset-x-0 bottom-0 z-10 border-t border-base-300 bg-base-100 p-4 shadow">
+    <div class="mx-auto max-w-5xl">
+      <div class="mb-2 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="truncate text-sm font-semibold"><%= @book.title %></div>
+          <div class="text-xs opacity-60"><%= @m4b_file.duration_label %></div>
+        </div>
+        <%= lucide_icon("headphones", "class" => "size-5 opacity-60") %>
+      </div>
+      <%= render "books/audio_player", book: @book, m4b_file: @m4b_file, progress: @progress, mode: "read_and_listen" %>
+    </div>
+  </div>
+</div>

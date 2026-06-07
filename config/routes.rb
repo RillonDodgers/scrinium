@@ -1,7 +1,19 @@
 Rails.application.routes.draw do
   resource :session
   resource :library_media_filter, only: :update
-  resources :books, only: :show
+  resources :books, only: :show do
+    member do
+      get :read
+      get :listen
+      get :read_and_listen
+      patch :progress
+    end
+  end
+  resources :book_files, only: [] do
+    member do
+      get :media
+    end
+  end
   resources :passwords, param: :token
 
   namespace :admin do

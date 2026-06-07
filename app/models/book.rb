@@ -3,6 +3,7 @@ class Book < ApplicationRecord
   belongs_to :author
   belongs_to :series, optional: true
   has_many :book_files, dependent: :destroy
+  has_many :book_progresses, dependent: :destroy
   has_many :book_metadata_tags, dependent: :destroy
   has_many :metadata_tags, through: :book_metadata_tags
 
@@ -28,6 +29,30 @@ class Book < ApplicationRecord
 
   def available_formats
     present_book_files.map(&:format).uniq
+  end
+
+  def epub_file
+    present_book_files.find(&:epub?)
+  end
+
+  def m4b_file
+    present_book_files.find(&:m4b?)
+  end
+
+  def readable?
+    epub_file.present?
+  end
+
+  def listenable?
+    m4b_file.present?
+  end
+
+  def read_and_listen?
+    readable? && listenable?
+  end
+
+  def progress_for(user)
+    book_progresses.find_or_initialize_by(user:)
   end
 
   def metadata_tags_for(category_slug)

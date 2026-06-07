@@ -1,0 +1,58 @@
+<% epub_file = book.epub_file %>
+<% m4b_file = book.m4b_file %>
+
+<section class="space-y-4">
+  <h2 class="text-2xl font-semibold">Reading options</h2>
+  <ul class="list bg-base-100 shadow-sm">
+    <li class="list-row">
+      <div class="grid size-10 place-items-center rounded-md bg-base-200">
+        <%= lucide_icon("book-open", "class" => "size-5") %>
+      </div>
+      <div>
+        <div class="font-semibold">Read</div>
+        <div class="text-sm opacity-60"><%= epub_file ? "EPUB available" : "No EPUB found" %></div>
+      </div>
+      <% if epub_file %>
+        <%= link_to "Open", read_book_path(book), class: "btn btn-primary btn-sm" %>
+      <% else %>
+        <span class="badge badge-ghost">Unavailable</span>
+      <% end %>
+    </li>
+
+    <li class="list-row">
+      <div class="grid size-10 place-items-center rounded-md bg-base-200">
+        <%= lucide_icon("headphones", "class" => "size-5") %>
+      </div>
+      <div>
+        <div class="font-semibold">Listen</div>
+        <div class="text-sm opacity-60">
+          <% if m4b_file %>
+            <%= [m4b_file.duration_label, pluralize(m4b_file.chapter_count, "chapter")].compact.join(" · ") %>
+          <% else %>
+            No M4B found
+          <% end %>
+        </div>
+      </div>
+      <% if m4b_file %>
+        <%= link_to "Open", listen_book_path(book), class: "btn btn-primary btn-sm" %>
+      <% else %>
+        <span class="badge badge-ghost">Unavailable</span>
+      <% end %>
+    </li>
+
+    <li class="list-row">
+      <div class="grid size-10 place-items-center rounded-md bg-base-200">
+        <%= lucide_icon("panel-bottom", "class" => "size-5") %>
+      </div>
+      <div>
+        <div class="font-semibold">Read + Listen</div>
+        <div class="text-sm opacity-60"><%= epub_file && m4b_file ? "Reader with mini player" : "Requires EPUB and M4B" %></div>
+      </div>
+      <% if epub_file && m4b_file %>
+        <%= link_to "Open", read_and_listen_book_path(book), class: "btn btn-primary btn-sm" %>
+      <% else %>
+        <span class="badge badge-ghost">Unavailable</span>
+      <% end %>
+    </li>
+  </ul>
+</section>

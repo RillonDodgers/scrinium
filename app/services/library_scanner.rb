@@ -72,6 +72,7 @@ class LibraryScanner
     new_record = book_file.new_record?
 
     book_file.assign_attributes(relative_path:, status: :present, size_bytes: file_stat.size, mtime: file_stat.mtime)
+    assign_media_probe(book_file) if should_probe_media?(book_file, new_record)
     book_file.save! if new_record || book_file.changed?
 
     if new_record
@@ -138,6 +139,14 @@ class LibraryScanner
       book.book_files.where(format:, status: :missing).where.not(id: current_file.id).destroy_all
       book.destroy! if book.book_files.reload.none?
     end
+  end
+
+  def should_probe_media?(book_file, new_record)
+    new_record || book_file.changed? || (book_file.media_metadata.blank? && book_file.chapters.blank?)
+  end
+
+  def assign_media_probe(book_file)
+    book_file.assign_attributes(MediaProbe.new(book_file:).call)
   end
 
   def mark_missing_files

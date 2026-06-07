@@ -60,33 +60,5 @@
     <%= render "books/tag_group", title: "Content Warnings", tags: @book.metadata_tags_for("content-warning"), reveal: true %>
   </section>
 
-  <section class="space-y-4">
-    <h2 class="text-2xl font-semibold">Available formats</h2>
-    <div class="grid gap-4 md:grid-cols-2">
-      <% @book.available_book_files.each do |book_file| %>
-        <div class="border border-base-300 bg-base-100 p-4 shadow-sm">
-          <div class="flex items-center justify-between gap-3">
-            <h3 class="font-semibold uppercase"><%= book_file.format %></h3>
-            <span class="badge <%= book_file.status_missing? ? "badge-error" : "badge-success" %>"><%= book_file.status %></span>
-          </div>
-          <dl class="mt-4 grid gap-2 text-sm">
-            <div>
-              <dt class="opacity-60">Path</dt>
-              <dd class="break-all font-mono text-xs"><%= book_file.relative_path %></dd>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <dt class="opacity-60">Size</dt>
-                <dd><%= number_to_human_size(book_file.size_bytes) %></dd>
-              </div>
-              <div>
-                <dt class="opacity-60">Modified</dt>
-                <dd><%= book_file.mtime.to_fs(:short) %></dd>
-              </div>
-            </div>
-          </dl>
-        </div>
-      <% end %>
-    </div>
-  </section>
+  <%= render "books/reading_options", book: @book %>
 </div>

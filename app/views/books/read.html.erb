@@ -1,0 +1,14 @@
+<div class="space-y-5">
+  <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <%= link_to book_path(@book), class: "btn btn-ghost btn-sm mb-2" do %>
+        <%= lucide_icon("arrow-left", "class" => "size-4") %>
+        Back
+      <% end %>
+      <h1 class="text-2xl font-bold"><%= @book.title %></h1>
+      <p class="text-sm opacity-60">By <%= @book.author.name %></p>
+    </div>
+  </header>
+
+  <%= render "books/epub_reader", book: @book, epub_file: @epub_file, progress: @progress, mode: "read" %>
+</div>
