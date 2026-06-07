@@ -6,20 +6,31 @@
 
   <div class="card bg-base-100 shadow">
     <div class="card-body">
-      <dl class="grid gap-4 sm:grid-cols-3">
-        <div>
-          <dt class="text-sm opacity-70">Author</dt>
-          <dd class="font-semibold"><%= @book.author.name %></dd>
+      <div class="grid gap-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-1">
+          <% @book.book_files.each do |book_file| %>
+            <div>
+              <%= render "books/cover", book_file: %>
+              <p class="mt-2 text-center text-xs font-semibold uppercase tracking-wide opacity-70"><%= book_file.format %></p>
+            </div>
+          <% end %>
         </div>
-        <div>
-          <dt class="text-sm opacity-70">Series</dt>
-          <dd class="font-semibold"><%= @book.series&.name || "None" %></dd>
-        </div>
-        <div>
-          <dt class="text-sm opacity-70">Library</dt>
-          <dd class="font-semibold"><%= @library.name %></dd>
-        </div>
-      </dl>
+
+        <dl class="grid content-start gap-4 sm:grid-cols-3">
+          <div>
+            <dt class="text-sm opacity-70">Author</dt>
+            <dd class="font-semibold"><%= @book.author.name %></dd>
+          </div>
+          <div>
+            <dt class="text-sm opacity-70">Series</dt>
+            <dd class="font-semibold"><%= @book.series&.name || "None" %></dd>
+          </div>
+          <div>
+            <dt class="text-sm opacity-70">Library</dt>
+            <dd class="font-semibold"><%= @library.name %></dd>
+          </div>
+        </dl>
+      </div>
     </div>
   </div>
 

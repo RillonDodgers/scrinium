@@ -71,3 +71,5 @@ group :test do
 end
 
 gem "action_policy", "~> 0.7.6"
+
+gem "lucide-rails", "~> 0.7.4"

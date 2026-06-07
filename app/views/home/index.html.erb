@@ -1,1 +1,39 @@
-<h1 class="text-3xl font-bold">Scrinium</h1>
+<div class="space-y-6">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-wide opacity-60">Home</p>
+      <h1 class="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Library</h1>
+    </div>
+
+    <%= form_with url: root_path, method: :get, class: "join w-full max-w-xl sm:w-auto", data: { turbo_frame: "_top" } do |form| %>
+      <%= form.search_field :q, value: @query, placeholder: "Search books or authors", class: "input join-item input-bordered w-full sm:w-96" %>
+      <%= button_tag class: "btn join-item", name: nil do %>
+        <%= lucide_icon("search", "class" => "size-4") %>
+        <span class="sr-only">Search</span>
+      <% end %>
+    <% end %>
+  </header>
+
+  <% if @ebook_files.any? %>
+    <div class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8">
+      <%= render partial: "books/cover_card", collection: @ebook_files, as: :book_file %>
+    </div>
+  <% else %>
+    <div class="border border-dashed border-base-content/20 bg-base-100 p-8 text-center shadow-sm">
+      <div class="mx-auto grid size-14 place-items-center rounded-full bg-base-200">
+        <%= lucide_icon("book-open", "class" => "size-7 opacity-60") %>
+      </div>
+      <% if @query.present? %>
+        <h2 class="mt-4 text-lg font-semibold">No matching ebooks</h2>
+        <p class="mt-2 text-sm opacity-70">Try a different title or author.</p>
+        <%= link_to "Clear search", root_path, class: "btn btn-primary mt-5" %>
+      <% else %>
+        <h2 class="mt-4 text-lg font-semibold">No ebooks indexed</h2>
+        <p class="mt-2 text-sm opacity-70">Scan a library from admin to fill this shelf.</p>
+        <% if Current.user.admin? %>
+          <%= link_to "Open admin", admin_root_path, class: "btn btn-primary mt-5" %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

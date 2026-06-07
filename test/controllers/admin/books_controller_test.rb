@@ -25,6 +25,7 @@ class Admin::BooksControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", "Dungeon Crawler Carl"
+    assert_select "span", { text: "No cover", count: 2 }
     assert_select "code", "Matt Dinniman/Dungeon Crawler Carl/Dungeon Crawler Carl.epub"
   end
 
