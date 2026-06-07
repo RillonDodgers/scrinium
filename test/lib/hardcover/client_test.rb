@@ -160,6 +160,32 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     assert_equal 7.days, expires_in
   end
 
+  test "search normalizes cached Hardcover result wrapper" do
+    Rails.cache.write(
+      [ "hardcover", "search_books", "v2", "project hail mary", 1, 5 ],
+      {
+        "found" => 5,
+        "hits" => [
+          {
+            "document" => {
+              "id" => 427578,
+              "title" => "Project Hail Mary",
+              "author_names" => [ "Andy Weir" ]
+            }
+          }
+        ]
+      }
+    )
+
+    results = Hardcover::Client.new.search_books(query: "Project Hail Mary")
+
+    assert_equal [ {
+      "id" => 427578,
+      "title" => "Project Hail Mary",
+      "author_names" => [ "Andy Weir" ]
+    } ], results
+  end
+
 private
 
   def hardcover_api_token
