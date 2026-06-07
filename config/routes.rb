@@ -3,9 +3,14 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
 
   namespace :admin do
+    resource :settings, only: %i[ edit update ]
+
     resources :libraries do
       resources :scan_runs, only: %i[ create show ]
-      resources :books, only: %i[ index show ]
+      resources :books, only: %i[ index show ] do
+        get :hardcover_search, to: "hardcover_metadata#search"
+        post :hardcover_metadata, to: "hardcover_metadata#apply"
+      end
     end
 
     root "libraries#index"

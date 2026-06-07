@@ -1,5 +1,8 @@
 <div class="w-full space-y-6">
-  <%= render "admin/shared/page_header", title: "Libraries", eyebrow: "Admin", actions: link_to("New library", new_admin_library_path, class: "btn btn-primary") %>
+  <%= render "admin/shared/page_header", title: "Libraries", eyebrow: "Admin", actions: safe_join([
+    link_to("Settings", edit_admin_settings_path, class: "btn btn-ghost"),
+    link_to("New library", new_admin_library_path, class: "btn btn-primary")
+  ]) %>
 
   <% if @libraries.any? %>
     <div class="grid gap-4">

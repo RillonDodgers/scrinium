@@ -1,0 +1,25 @@
+<div class="w-full space-y-6">
+  <%= render "admin/shared/page_header", title: "Settings", eyebrow: "Admin" %>
+
+  <%= form_with model: @settings, url: admin_settings_path, class: "card bg-base-100 shadow" do |form| %>
+    <div class="card-body gap-4">
+      <% if @settings.errors.any? %>
+        <div class="alert alert-error">
+          <span><%= @settings.errors.full_messages.to_sentence %></span>
+        </div>
+      <% end %>
+
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text">Hardcover API token</span>
+        </div>
+        <%= form.password_field :hardcover_api_token, value: @settings.hardcover_api_token, class: "input input-bordered w-full", autocomplete: "off" %>
+      </label>
+
+      <div class="card-actions justify-end">
+        <%= link_to "Libraries", admin_libraries_path, class: "btn btn-ghost" %>
+        <%= form.submit "Save settings", class: "btn btn-primary" %>
+      </div>
+    </div>
+  <% end %>
+</div>
