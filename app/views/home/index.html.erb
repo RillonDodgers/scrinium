@@ -14,9 +14,17 @@
     <% end %>
   </header>
 
-  <% if @ebook_files.any? %>
+  <div class="flex flex-wrap gap-2">
+    <% @media_filter_options.each do |label, value| %>
+      <%= button_to library_media_filter_path, method: :patch, params: { media_filter: value, q: @query.presence }, class: "btn btn-sm rounded-full #{value == @media_filter ? "btn-primary" : "btn-ghost"}" do %>
+        <%= label %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @book_files.any? %>
     <div class="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8">
-      <%= render partial: "books/cover_card", collection: @ebook_files, as: :book_file %>
+      <%= render partial: "books/cover_card", collection: @book_files, as: :book_file %>
     </div>
   <% else %>
     <div class="border border-dashed border-base-content/20 bg-base-100 p-8 text-center shadow-sm">
@@ -24,11 +32,11 @@
         <%= lucide_icon("book-open", "class" => "size-7 opacity-60") %>
       </div>
       <% if @query.present? %>
-        <h2 class="mt-4 text-lg font-semibold">No matching ebooks</h2>
+        <h2 class="mt-4 text-lg font-semibold">No matching media</h2>
         <p class="mt-2 text-sm opacity-70">Try a different title or author.</p>
         <%= link_to "Clear search", root_path, class: "btn btn-primary mt-5" %>
       <% else %>
-        <h2 class="mt-4 text-lg font-semibold">No ebooks indexed</h2>
+        <h2 class="mt-4 text-lg font-semibold">No media indexed</h2>
         <p class="mt-2 text-sm opacity-70">Scan a library from admin to fill this shelf.</p>
         <% if Current.user.admin? %>
           <%= link_to "Open admin", admin_root_path, class: "btn btn-primary mt-5" %>

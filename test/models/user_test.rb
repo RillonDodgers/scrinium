@@ -9,4 +9,8 @@ class UserTest < ActiveSupport::TestCase
   test "defaults role to user" do
     assert_predicate User.new, :user?
   end
+
+  test "defaults library media filter to ebooks" do
+    assert_predicate User.new, :library_media_filter_ebooks?
+  end
 end

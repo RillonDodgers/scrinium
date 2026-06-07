@@ -25,6 +25,42 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select "p", "Matt Dinniman"
   end
 
+  test "user defaults to saved media filter" do
+    @book.book_files.create!(
+      format: :m4b,
+      relative_path: "Matt Dinniman/Dungeon Crawler Carl/Dungeon Crawler Carl.m4b",
+      status: :present,
+      size_bytes: 5,
+      mtime: Time.current
+    )
+    users(:one).update!(library_media_filter: :audiobooks)
+    sign_in_as users(:one)
+
+    get root_path
+
+    assert_response :success
+    assert_select ".badge", "m4b"
+    assert_select ".badge", text: "epub", count: 0
+  end
+
+  test "both media filter shows ebooks and audiobooks" do
+    @book.book_files.create!(
+      format: :m4b,
+      relative_path: "Matt Dinniman/Dungeon Crawler Carl/Dungeon Crawler Carl.m4b",
+      status: :present,
+      size_bytes: 5,
+      mtime: Time.current
+    )
+    users(:one).update!(library_media_filter: :both)
+    sign_in_as users(:one)
+
+    get root_path
+
+    assert_response :success
+    assert_select ".badge", "epub"
+    assert_select ".badge", "m4b"
+  end
+
   test "user sees attached ebook cover" do
     @ebook_file.cover.attach(io: StringIO.new("cover"), filename: "cover.jpg", content_type: "image/jpeg")
     sign_in_as users(:one)
