@@ -33,18 +33,19 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     response = json_response({
       data: {
         search: {
-          results: [
-            {
-              found: 5,
-              hits: [],
-              document: {
-                id: 427578,
-                title: "Project Hail Mary",
-                author_names: [ "Andy Weir" ],
-                series_names: []
+          results: {
+            found: 5,
+            hits: [
+              {
+                document: {
+                  id: 427578,
+                  title: "Project Hail Mary",
+                  author_names: [ "Andy Weir" ],
+                  series_names: []
+                }
               }
-            }
-          ]
+            ]
+          }
         }
       }
     })
@@ -56,6 +57,30 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
       "title" => "Project Hail Mary",
       "author_names" => [ "Andy Weir" ],
       "series_names" => []
+    } ], results
+  end
+
+  test "search preserves flat result hashes" do
+    response = json_response({
+      data: {
+        search: {
+          results: [
+            {
+              id: 1,
+              title: "Dune",
+              author_names: [ "Frank Herbert" ]
+            }
+          ]
+        }
+      }
+    })
+
+    results = Hardcover::Client.new(http: fake_http(response)).search_books(query: "Dune")
+
+    assert_equal [ {
+      "id" => 1,
+      "title" => "Dune",
+      "author_names" => [ "Frank Herbert" ]
     } ], results
   end
 

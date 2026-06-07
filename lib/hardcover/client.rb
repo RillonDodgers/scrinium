@@ -118,7 +118,12 @@ module Hardcover
     end
 
     def search_results_from(response)
-      Array(response.dig("data", "search", "results")).filter_map do |result|
+      results = response.dig("data", "search", "results")
+      hits = results.is_a?(Hash) ? results["hits"] : results
+
+      Array(hits).filter_map do |result|
+        next result unless result.is_a?(Hash)
+
         result["document"].presence || result
       end
     end
