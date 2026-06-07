@@ -24,7 +24,13 @@
   </head>
 
   <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <main class="container mx-auto mt-28 px-5 flex flex-col gap-4">
+      <% flash.each do |type, message| %>
+        <div class="alert <%= type == "alert" ? "alert-error" : "alert-success" %>">
+          <span><%= message %></span>
+        </div>
+      <% end %>
+
       <%= yield %>
     </main>
   </body>

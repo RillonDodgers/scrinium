@@ -22,6 +22,10 @@ Rails.application.configure do
   config.consider_all_requests_local = true
   config.cache_store = :null_store
 
+  config.active_record.encryption.primary_key = "0" * 32
+  config.active_record.encryption.deterministic_key = "1" * 32
+  config.active_record.encryption.key_derivation_salt = "2" * 32
+
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 

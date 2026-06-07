@@ -1,5 +1,8 @@
 <div class="w-full space-y-6">
-  <%= render "admin/shared/page_header", title: @book.title, eyebrow: @book.author.name, actions: link_to("Back to books", admin_library_books_path(@library), class: "btn btn-ghost") %>
+  <%= render "admin/shared/page_header", title: @book.title, eyebrow: @book.author.name, actions: safe_join([
+    link_to("Search Hardcover", admin_library_book_hardcover_search_path(@library, @book), class: "btn btn-primary"),
+    link_to("Back to books", admin_library_books_path(@library), class: "btn btn-ghost")
+  ]) %>
 
   <div class="card bg-base-100 shadow">
     <div class="card-body">
@@ -32,6 +35,7 @@
               <th>Relative path</th>
               <th>Size</th>
               <th>Modified</th>
+              <th>Cover</th>
             </tr>
           </thead>
           <tbody>
@@ -42,6 +46,13 @@
                 <td><code><%= book_file.relative_path %></code></td>
                 <td><%= number_to_human_size(book_file.size_bytes) %></td>
                 <td><%= book_file.mtime.to_fs(:short) %></td>
+                <td>
+                  <% if book_file.cover.attached? %>
+                    <span class="badge badge-success">cover</span>
+                  <% else %>
+                    <span class="badge badge-ghost">no cover</span>
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -49,4 +60,67 @@
       </div>
     </div>
   </div>
+
+  <% if @hardcover_modal_open %>
+    <dialog class="modal" open>
+      <div class="modal-box max-w-4xl">
+        <h2 class="text-xl font-bold">Hardcover metadata</h2>
+
+        <%= form_with url: admin_library_book_hardcover_search_path(@library, @book), method: :get, class: "mt-4 flex flex-col gap-3 sm:flex-row" do |form| %>
+          <%= form.text_field :query, value: @hardcover_query || [ @book.title, @book.author.name ].join(" "), class: "input input-bordered w-full" %>
+          <%= form.submit "Search", class: "btn btn-primary" %>
+        <% end %>
+
+        <% if defined?(@hardcover_results) && @hardcover_results.present? %>
+          <div class="mt-6 grid gap-4">
+            <% @hardcover_results.each do |result| %>
+              <% hardcover_book_id = result["id"] || result["book_id"] %>
+              <div class="border border-base-300 p-4">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h3 class="font-semibold"><%= result["title"] %></h3>
+                    <p class="text-sm opacity-70"><%= Array(result["author_names"]).join(", ") %></p>
+                    <p class="text-sm opacity-70">
+                      <%= [ Array(result["series_names"]).first, result["release_year"], result["rating"] && "Rating #{result["rating"]}" ].compact.join(" · ") %>
+                    </p>
+                  </div>
+
+                  <%= form_with url: admin_library_book_hardcover_metadata_path(@library, @book), method: :post, class: "grid gap-2" do |form| %>
+                    <%= hidden_field_tag :hardcover_book_id, hardcover_book_id %>
+                    <label class="label cursor-pointer justify-start gap-2">
+                      <%= check_box_tag "fields[title]", "1", true, class: "checkbox checkbox-sm" %>
+                      <span class="label-text">Title</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2">
+                      <%= check_box_tag "fields[author]", "1", true, class: "checkbox checkbox-sm" %>
+                      <span class="label-text">Author</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2">
+                      <%= check_box_tag "fields[series]", "1", true, class: "checkbox checkbox-sm" %>
+                      <span class="label-text">Series</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2">
+                      <%= check_box_tag "fields[ebook_cover]", "1", true, class: "checkbox checkbox-sm" %>
+                      <span class="label-text">Ebook cover</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2">
+                      <%= check_box_tag "fields[audiobook_cover]", "1", true, class: "checkbox checkbox-sm" %>
+                      <span class="label-text">Audiobook cover</span>
+                    </label>
+                    <%= form.submit "Apply", class: "btn btn-sm btn-primary" %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% elsif defined?(@hardcover_results) %>
+          <p class="mt-6 opacity-70">No Hardcover results found.</p>
+        <% end %>
+
+        <div class="modal-action">
+          <%= link_to "Close", admin_library_book_path(@library, @book), class: "btn" %>
+        </div>
+      </div>
+    </dialog>
+  <% end %>
 </div>

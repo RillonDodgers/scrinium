@@ -1,5 +1,6 @@
 class BookFile < ApplicationRecord
   belongs_to :book
+  has_one_attached :cover
 
   enum :format, { epub: "epub", m4b: "m4b" }, validate: true
   enum :status, { present: "present", missing: "missing" }, prefix: true, validate: true
