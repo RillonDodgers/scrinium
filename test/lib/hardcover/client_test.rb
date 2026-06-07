@@ -99,12 +99,30 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
         books: [
           {
             id: 7,
+            slug: "dungeon-crawler-carl",
             title: "Dungeon Crawler Carl",
             subtitle: nil,
+            description: "A man. His ex-girlfriend's cat.",
+            release_date: "2020-09-28",
             release_year: 2020,
             rating: 4.5,
+            ratings_count: 2554,
+            ratings_distribution: { "5" => 1000 },
+            pages: 465,
             contributions: [ { author: { name: "Matt Dinniman" } } ],
-            book_series: [ { featured: true, series: { name: "Dungeon Crawler Carl" } } ],
+            book_series: [ { featured: true, position: 1, series: { id: 9, name: "Dungeon Crawler Carl", books_count: 8 } } ],
+            taggable_counts: [
+              {
+                count: 20,
+                spoiler_ratio: 0,
+                tag: {
+                  id: 1,
+                  tag: "Fantasy",
+                  slug: "fantasy",
+                  tag_category: { category: "Genre", slug: "genre" }
+                }
+              }
+            ],
             default_ebook_edition: { image: { url: "https://example.com/ebook.jpg" } },
             default_audio_edition: { image: { url: "https://example.com/audio.jpg" } }
           }
@@ -115,8 +133,16 @@ class Hardcover::ClientTest < ActiveSupport::TestCase
     metadata = Hardcover::Client.new(http: fake_http(response)).book_metadata(id: 7)
 
     assert_equal "Dungeon Crawler Carl", metadata.title
+    assert_equal "dungeon-crawler-carl", metadata.slug
+    assert_equal "A man. His ex-girlfriend's cat.", metadata.description
     assert_equal "Matt Dinniman", metadata.primary_author_name
     assert_equal "Dungeon Crawler Carl", metadata.series_name
+    assert_equal 9, metadata.series_id
+    assert_equal 8, metadata.series_books_count
+    assert_equal 1, metadata.series_position
+    assert_equal 465, metadata.pages
+    assert_equal 2554, metadata.ratings_count
+    assert_equal "Fantasy", metadata.tags.first.name
     assert_equal "https://example.com/ebook.jpg", metadata.ebook_cover_url
     assert_equal "https://example.com/audio.jpg", metadata.audiobook_cover_url
   end

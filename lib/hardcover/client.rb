@@ -22,10 +22,16 @@ module Hardcover
       query BookMetadata($id: Int!) {
         books(where: { id: { _eq: $id } }, limit: 1) {
           id
+          slug
           title
           subtitle
+          description
+          release_date
           release_year
           rating
+          ratings_count
+          ratings_distribution
+          pages
           contributions {
             author {
               name
@@ -33,8 +39,24 @@ module Hardcover
           }
           book_series {
             featured
+            position
             series {
+              id
               name
+              books_count
+            }
+          }
+          taggable_counts(limit: 80, order_by: { count: desc }) {
+            count
+            spoiler_ratio
+            tag {
+              id
+              tag
+              slug
+              tag_category {
+                category
+                slug
+              }
             }
           }
           default_cover_edition {

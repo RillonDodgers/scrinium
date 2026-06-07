@@ -1,0 +1,92 @@
+<div class="space-y-8">
+  <section class="grid gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
+    <div>
+      <%= render "books/cover", book_file: @book.preferred_cover_file, book: @book %>
+    </div>
+
+    <div class="space-y-5">
+      <div>
+        <% if @book.series.present? %>
+          <p class="text-sm font-semibold uppercase tracking-wide opacity-60">
+            <%= @book.series.name %><%= " ##{@book.series_position.to_s.sub(/\.0+\z/, "")}" if @book.series_position.present? %>
+          </p>
+        <% end %>
+        <h1 class="mt-1 text-3xl font-bold tracking-tight sm:text-5xl"><%= @book.title %></h1>
+        <% if @book.subtitle.present? %>
+          <p class="mt-2 text-xl opacity-75"><%= @book.subtitle %></p>
+        <% end %>
+        <p class="mt-3 text-lg">By <%= @book.author.name %></p>
+      </div>
+
+      <dl class="grid gap-3 sm:grid-cols-4">
+        <% if @book.release_year.present? %>
+          <div>
+            <dt class="text-sm opacity-60">Released</dt>
+            <dd class="font-semibold"><%= @book.release_date&.to_fs(:long) || @book.release_year %></dd>
+          </div>
+        <% end %>
+        <% if @book.pages.present? %>
+          <div>
+            <dt class="text-sm opacity-60">Pages</dt>
+            <dd class="font-semibold"><%= number_with_delimiter(@book.pages) %></dd>
+          </div>
+        <% end %>
+        <% if @book.average_rating.present? %>
+          <div>
+            <dt class="text-sm opacity-60">Average rating</dt>
+            <dd class="font-semibold"><%= number_with_precision(@book.average_rating, precision: 2) %></dd>
+          </div>
+        <% end %>
+        <% if @book.ratings_count.present? %>
+          <div>
+            <dt class="text-sm opacity-60">Ratings</dt>
+            <dd class="font-semibold"><%= number_with_delimiter(@book.ratings_count) %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+  </section>
+
+  <% if @book.description.present? %>
+    <section class="space-y-3">
+      <h2 class="text-2xl font-semibold">Book info</h2>
+      <div class="max-w-5xl whitespace-pre-line text-base leading-7 opacity-90"><%= @book.description %></div>
+    </section>
+  <% end %>
+
+  <section class="grid gap-6 lg:grid-cols-3">
+    <%= render "books/tag_group", title: "Genres", tags: @book.metadata_tags_for("genre"), reveal: false %>
+    <%= render "books/tag_group", title: "Moods", tags: @book.metadata_tags_for("mood"), reveal: false %>
+    <%= render "books/tag_group", title: "Content Warnings", tags: @book.metadata_tags_for("content-warning"), reveal: true %>
+  </section>
+
+  <section class="space-y-4">
+    <h2 class="text-2xl font-semibold">Available formats</h2>
+    <div class="grid gap-4 md:grid-cols-2">
+      <% @book.available_book_files.each do |book_file| %>
+        <div class="border border-base-300 bg-base-100 p-4 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="font-semibold uppercase"><%= book_file.format %></h3>
+            <span class="badge <%= book_file.status_missing? ? "badge-error" : "badge-success" %>"><%= book_file.status %></span>
+          </div>
+          <dl class="mt-4 grid gap-2 text-sm">
+            <div>
+              <dt class="opacity-60">Path</dt>
+              <dd class="break-all font-mono text-xs"><%= book_file.relative_path %></dd>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <dt class="opacity-60">Size</dt>
+                <dd><%= number_to_human_size(book_file.size_bytes) %></dd>
+              </div>
+              <div>
+                <dt class="opacity-60">Modified</dt>
+                <dd><%= book_file.mtime.to_fs(:short) %></dd>
+              </div>
+            </div>
+          </dl>
+        </div>
+      <% end %>
+    </div>
+  </section>
+</div>

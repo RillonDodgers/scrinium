@@ -59,14 +59,10 @@ class Admin::BooksControllerTest < ActionDispatch::IntegrationTest
 
   test "apply updates selected fields only" do
     sign_in_as users(:admin)
-    metadata = Hardcover::BookMetadata.new(
-      id: 123,
+    metadata = book_metadata(
       title: "Dungeon Crawler Carl Updated",
-      subtitle: nil,
       author_names: [ "Matt Dinniman Updated" ],
       series_name: "Dungeon Crawler Carl",
-      release_year: 2020,
-      rating: 4.5,
       ebook_cover_url: nil,
       audiobook_cover_url: nil
     )
@@ -86,14 +82,9 @@ class Admin::BooksControllerTest < ActionDispatch::IntegrationTest
 
   test "apply attaches epub and audiobook covers independently" do
     sign_in_as users(:admin)
-    metadata = Hardcover::BookMetadata.new(
-      id: 123,
+    metadata = book_metadata(
       title: "Dungeon Crawler Carl",
-      subtitle: nil,
-      author_names: [ "Matt Dinniman" ],
       series_name: nil,
-      release_year: 2020,
-      rating: 4.5,
       ebook_cover_url: "https://example.com/ebook.jpg",
       audiobook_cover_url: "https://example.com/audio.jpg"
     )
@@ -113,6 +104,79 @@ class Admin::BooksControllerTest < ActionDispatch::IntegrationTest
     assert_predicate @book.book_files.find_by(format: :m4b).cover, :attached?
   end
 
+  test "apply stores book details and normalized tags" do
+    sign_in_as users(:admin)
+    metadata = book_metadata(
+      description: "A man. His ex-girlfriend's cat.",
+      pages: 465,
+      tags: [
+        Hardcover::TagMetadata.new(
+          hardcover_tag_id: 1,
+          category: "Genre",
+          category_slug: "genre",
+          name: "Fantasy",
+          slug: "fantasy",
+          count: 20,
+          spoiler_ratio: 0
+        ),
+        Hardcover::TagMetadata.new(
+          hardcover_tag_id: 2,
+          category: "Content Warning",
+          category_slug: "content-warning",
+          name: "Violence",
+          slug: "violence",
+          count: 6,
+          spoiler_ratio: 0
+        )
+      ]
+    )
+
+    with_singleton_method(Hardcover::Client, :new, fake_client(metadata:)) do
+      post admin_library_book_hardcover_metadata_path(@library, @book), params: {
+        hardcover_book_id: 123,
+        fields: { details: "1", tags: "1" }
+      }
+    end
+
+    assert_redirected_to admin_library_book_path(@library, @book)
+    @book.reload
+    assert_equal 123, @book.hardcover_id
+    assert_equal "A man. His ex-girlfriend's cat.", @book.description
+    assert_equal 465, @book.pages
+    assert_equal 2, @book.metadata_tags.count
+    assert_equal "Fantasy", @book.metadata_tags.find_by(category_slug: "genre").name
+    assert_equal 20, @book.book_metadata_tags.joins(:metadata_tag).find_by(metadata_tags: { slug: "fantasy" }).count
+  end
+
+  test "apply replaces stale metadata tag joins" do
+    stale_tag = MetadataTag.create!(hardcover_tag_id: 99, category: "Genre", category_slug: "genre", name: "Horror", slug: "horror")
+    @book.book_metadata_tags.create!(metadata_tag: stale_tag, count: 5, spoiler_ratio: 0)
+    sign_in_as users(:admin)
+    metadata = book_metadata(
+      tags: [
+        Hardcover::TagMetadata.new(
+          hardcover_tag_id: 1,
+          category: "Genre",
+          category_slug: "genre",
+          name: "Fantasy",
+          slug: "fantasy",
+          count: 20,
+          spoiler_ratio: 0
+        )
+      ]
+    )
+
+    with_singleton_method(Hardcover::Client, :new, fake_client(metadata:)) do
+      post admin_library_book_hardcover_metadata_path(@library, @book), params: {
+        hardcover_book_id: 123,
+        fields: { tags: "1" }
+      }
+    end
+
+    assert_redirected_to admin_library_book_path(@library, @book)
+    assert_equal [ "Fantasy" ], @book.reload.metadata_tags.pluck(:name)
+  end
+
   test "missing token error redirects without partial update" do
     sign_in_as users(:admin)
 
@@ -129,6 +193,32 @@ class Admin::BooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def book_metadata(**overrides)
+    Hardcover::BookMetadata.new(
+      **{
+        id: 123,
+        slug: "dungeon-crawler-carl",
+        title: "Dungeon Crawler Carl",
+        subtitle: nil,
+        description: nil,
+        author_names: [ "Matt Dinniman" ],
+        series_name: nil,
+        series_id: nil,
+        series_books_count: nil,
+        series_position: nil,
+        release_date: nil,
+        release_year: 2020,
+        rating: 4.5,
+        ratings_count: 10,
+        ratings_distribution: {},
+        pages: nil,
+        tags: [],
+        ebook_cover_url: nil,
+        audiobook_cover_url: nil
+      }.merge(overrides)
+    )
+  end
 
   def fake_client(search_results: [], metadata: nil, error: nil)
     client = Object.new
